@@ -1,0 +1,9 @@
+[Unit]
+Description=Gesture daemon
+After=user-session.target
+
+[Service]
+ExecStart=/usr/bin/gestured
+
+[Install]
+WantedBy=post-user-session.target
