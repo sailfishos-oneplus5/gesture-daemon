@@ -1,15 +1,15 @@
 /*
- * (C) 2014 Kimmo Lindholm <kimmo.lindholm@gmail.com> Kimmoli
+ * (C) 2016 Kimmo Lindholm <kimmo.lindholm@eke.fi>
  *
- * Callflasher main
+ * Gesture daemon
  *
  */
 
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include "flasher.h"
-#include "adaptor.h"
+#include "gesture-actions.h"
+#include "mce/dbus-names.h"
 #include <QtCore/QCoreApplication>
 
 int main(int argc, char **argv)
@@ -19,16 +19,16 @@ int main(int argc, char **argv)
     setlinebuf(stdout);
     setlinebuf(stderr);
 
-    printf("callflasher: starting daemon version %s\n", APPVERSION);
+    printf("Starting gesture-daemon version %s\n", APPVERSION);
 
-    Flasher flasher;
-    new CallflasherAdaptor(&flasher);
+    Gestures gestures;
 
-    flasher.registerDBus();
-
-    static QDBusConnection mceCallStateconn = QDBusConnection::systemBus();
-    mceCallStateconn.connect("com.nokia.mce", "/com/nokia/mce/signal", "com.nokia.mce.signal", "sig_call_state_ind",
-                          &flasher, SLOT(handleCall(const QDBusMessage&)));
+    static QDBusConnection systembusConnection = QDBusConnection::systemBus();
+    systembusConnection.connect(MCE_SERVICE,
+                                MCE_SIGNAL_PATH,
+                                MCE_SIGNAL_IF,
+                                MCE_GESTURE_EVENT_SIG,
+                          &gestures, SLOT(handleGestureEvent(const QDBusMessage&)));
 
     return app.exec();
 }

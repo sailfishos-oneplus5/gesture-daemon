@@ -1,41 +1,29 @@
-#ifndef FLASHER_H
-#define FLASHER_H
+/*
+ * (C) 2016 Kimmo Lindholm <kimmo.lindholm@eke.fi>
+ *
+ * Gesture daemon
+ *
+ */
+
+#ifndef GESTURE_ACTIONS_H
+#define GESTURE_ACTIONS_H
 
 #include <QObject>
 #include <QtDBus/QtDBus>
 #include <QTimer>
 #include <QThread>
-#include <mlite5/MNotification>
-#include <mlite5/mdesktopentry.h>
 
-#define SERVICE_NAME "com.kimmoli.callflasher"
-
-class QDBusInterface;
-class Flasher : public QObject
+class Gestures : public QObject
 {
     Q_OBJECT
-    Q_CLASSINFO("D-Bus Interface", SERVICE_NAME)
 
 public:
-    explicit Flasher(QObject *parent = 0);
-    virtual ~Flasher();
-    void registerDBus();
-    void showNotification(QString text);
+    explicit Gestures(QObject *parent = 0);
+    virtual ~Gestures();
 
 public slots:
-    void enable();
-    void toggle();
-    void quit();
-
-    void handleCall(const QDBusMessage&);
-    void blinkTimerTimeout();
-
-private:
-    bool m_dbusRegistered;
-    bool m_enabled;
-    bool m_incomingCall;
-    QTimer *m_blinkTimer;
+    void handleGestureEvent(const QDBusMessage&);
 
 };
 
-#endif // FLASHER_H
+#endif // GESTURE_ACTIONS_H
