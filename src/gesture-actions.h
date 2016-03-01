@@ -24,6 +24,13 @@ public:
 public slots:
     void handleGestureEvent(const QDBusMessage&);
 
+private:
+    bool toggleFlashlight();
+    void sendMpris2(const QString &methodName);
+    void showCameraViewfinder();
+    void showVoicecallUi();
+    QString getMpris2Interface();
+
 };
 
 #endif // GESTURE_ACTIONS_H
