@@ -9,9 +9,8 @@
 #include "gesture-actions.h"
 #include "mce/dbus-names.h"
 #include "mce/mode-names.h"
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <QFile>
+#include <QTextStream>
 
 Gestures::Gestures(QObject *parent) :
     QObject(parent)
@@ -59,46 +58,31 @@ void Gestures::handleGestureEvent(const QDBusMessage & msg)
 
 bool Gestures::toggleFlashlight()
 {
-    int fd;
-    char buf[5];
-    bool ret = false;
     int brightness = 0;
 
-    fd = open("/sys/class/leds/led:flash_torch/brightness", O_RDONLY);
-    if (fd < 0)
-        goto EXIT;
+    QFile brf("/sys/class/leds/led:flash_torch/brightness");
+    if (!brf.open(QIODevice::ReadOnly | QIODevice::Text))
+        return false;
 
-    if (!(read(fd, buf, sizeof(buf)) > 0))
-    {
-        close(fd);
-        goto EXIT;
-    }
+    QTextStream in( &brf );
+    brightness = in.readLine().toInt();
 
-    close(fd);
-
-    brightness = atoi(buf);
+    brf.close();
 
     if (brightness == 0)
         brightness = 255;
     else
         brightness = 0;
 
-    fd = open("/sys/class/leds/led:flash_torch/brightness", O_WRONLY);
-    if (fd < 0)
-        goto EXIT;
+    if (!brf.open(QIODevice::WriteOnly))
+        return false;
 
-    sprintf(buf, "%d", brightness);
-    if (!(write(fd, buf, strlen(buf)) > 0))
-    {
-        close(fd);
-        goto EXIT;
-    }
+    QTextStream out (&brf);
+    out << QString("%1").arg(brightness);
 
-    close(fd);
+    brf.close();
 
-    ret = true;
-EXIT:
-    return ret;
+    return true;
 }
 
 void Gestures::sendMpris2(const QString &methodName)
