@@ -40,8 +40,11 @@ rm -rf %{buildroot}
 %qmake5_install
 
 %preun
-systemctl-user stop gestured
-systemctl-user disable gestured
+# in case of complete removal, stop and disable
+if [ "$1" = "0" ]; then
+  systemctl-user stop gestured
+  systemctl-user disable gestured
+fi
 
 %post
 systemctl-user daemon-reload
@@ -52,6 +55,7 @@ systemctl-user enable gestured
 # In case of update, stop first
 if [ "$1" = "2" ]; then
   systemctl-user stop gestured
+  systemctl-user disable gestured
 fi
 
 %files
