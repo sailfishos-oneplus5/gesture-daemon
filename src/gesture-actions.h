@@ -24,12 +24,18 @@ public:
 public slots:
     void handleGestureEvent(const QDBusMessage&);
 
+private slots:
+    void ownerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
+
 private:
     bool toggleFlashlight();
     void sendMpris2(const QString &methodName);
     void showCameraViewfinder();
     void showVoicecallUi();
-    QString getMpris2Interface();
+    bool getMpris2Service();
+
+    QString _mpris2Service;
+    QDBusServiceWatcher *_serviceWatcher;
 
 };
 

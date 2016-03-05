@@ -15,6 +15,13 @@
 Gestures::Gestures(QObject *parent) :
     QObject(parent)
 {
+    _mpris2Service = QString();
+
+    QDBusConnection bus = QDBusConnection::sessionBus();
+
+    _serviceWatcher->setConnection(bus);
+
+    connect(_serviceWatcher, SIGNAL(serviceOwnerChanged(QString,QString,QString)), this, SLOT(ownerChanged(QString,QString,QString)));
 }
 
 Gestures::~Gestures()
@@ -85,22 +92,88 @@ bool Gestures::toggleFlashlight()
     return true;
 }
 
-void Gestures::sendMpris2(const QString &methodName)
-{
-    Q_UNUSED(methodName)
-}
-
 void Gestures::showCameraViewfinder()
 {
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.camera", "/", "com.jolla.camera.ui", "showViewfinder");
 
+    QDBusError error = bus.call(call);
+
+    if (error.isValid())
+    {
+        qWarning() << "camera showViewfinder failed:" << error.message();
+    }
 }
 
 void Gestures::showVoicecallUi()
 {
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.voicecall.ui", "/org/maemo/m", "com.nokia.telephony.callhistory", "launch");
 
+    QVariantList args;
+    args << QString("hello");
+    call.setArguments(args);
+
+    QDBusError error = bus.call(call);
+
+    if (error.isValid())
+    {
+        qWarning() << "voicecall ui launch failed:" << error.message();
+    }
 }
 
-QString Gestures::getMpris2Interface()
+void Gestures::sendMpris2(const QString &methodName)
 {
-    return QString("org.mpris.MediaPlayer2.jolla-mediaplayer");
+    if (_mpris2Service.isEmpty())
+    {
+        if (!getMpris2Service())
+        {
+            qWarning() << "no mpris2 service available";
+            return;
+        }
+    }
+
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    QDBusMessage call = QDBusMessage::createMethodCall(_mpris2Service,
+                                                       "/org/mpris/MediaPlayer2",
+                                                       "org.mpris.MediaPlayer2.Player",
+                                                       methodName);
+
+    QDBusError error = bus.call(call);
+
+    if (error.isValid())
+    {
+        qWarning() << "mpris2 failed (" << _mpris2Service << ")" << error.message();
+    }
+}
+
+bool Gestures::getMpris2Service()
+{
+    bool ret = false;
+
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    QDBusConnectionInterface *bus_iface = bus.interface();
+
+    const QStringList &services = bus_iface->registeredServiceNames();
+    foreach (QString service, services)
+    {
+        if (service.startsWith("org.mpris.MediaPlayer2."))
+        {
+            _mpris2Service = service;
+            ret = true;
+            break;
+        }
+    }
+    return ret;
+}
+
+void Gestures::ownerChanged(const QString &name, const QString &oldOwner, const QString &newOwner)
+{
+    Q_UNUSED(oldOwner);
+
+    if (name == _mpris2Service && newOwner.isEmpty())
+    {
+        _mpris2Service = QString();
+        qDebug() << "mpris2 service removed from bus";
+    }
 }
