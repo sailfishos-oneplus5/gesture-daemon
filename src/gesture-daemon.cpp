@@ -9,8 +9,13 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "gesture-actions.h"
-#include "mce/dbus-names.h"
 #include <QtCore/QCoreApplication>
+
+#define MCE_SERVICE                 "com.nokia.mce"
+#define MCE_SIGNAL_PATH             "/com/nokia/mce/signal"
+#define MCE_SIGNAL_IF               "com.nokia.mce.signal"
+#define POWER_BUTTON_TRIGGER_SIG    "power_button_trigger"
+
 
 int main(int argc, char **argv)
 {
@@ -19,7 +24,7 @@ int main(int argc, char **argv)
     setlinebuf(stdout);
     setlinebuf(stderr);
 
-    printf("Starting gesture-daemon version %s\n", APPVERSION);
+    qDebug() << "Starting gesture-daemon version" << APPVERSION;
 
     Gestures gestures;
 
@@ -27,8 +32,8 @@ int main(int argc, char **argv)
     systembusConnection.connect(MCE_SERVICE,
                                 MCE_SIGNAL_PATH,
                                 MCE_SIGNAL_IF,
-                                MCE_GESTURE_EVENT_SIG,
-                          &gestures, SLOT(handleGestureEvent(const QDBusMessage&)));
+                                POWER_BUTTON_TRIGGER_SIG,
+                                &gestures, SLOT(handleGestureEvent(const QDBusMessage&)));
 
     return app.exec();
 }

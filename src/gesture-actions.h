@@ -28,7 +28,7 @@ private slots:
     void ownerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
 
 private:
-    bool toggleFlashlight();
+    void toggleFlashlight();
     void sendMpris2(const QString &methodName);
     void showCameraViewfinder();
     void showVoicecallUi();

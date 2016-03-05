@@ -14,8 +14,6 @@ INSTALLS += target systemduser
 
 message($${DEFINES})
 
-INCLUDEPATH += mce-dev/include/
-
 SOURCES += \
     src/gesture-daemon.cpp \
     src/gesture-actions.cpp
@@ -25,6 +23,4 @@ OTHER_FILES += \
     config/$${TARGET}.service
 
 HEADERS += \
-    src/gesture-actions.h \
-    mce-dev/include/mce/dbus-names.h \
-    mce-dev/include/mce/mode-names.h
+    src/gesture-actions.h
