@@ -17,9 +17,9 @@ Gestures::Gestures(QObject *parent) :
 
     QDBusConnection bus = QDBusConnection::sessionBus();
 
+    _serviceWatcher = new QDBusServiceWatcher(this);
     _serviceWatcher->setConnection(bus);
-
-    connect(_serviceWatcher, SIGNAL(serviceOwnerChanged(QString,QString,QString)), this, SLOT(ownerChanged(QString,QString,QString)));
+    connect(_serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this, &Gestures::ownerChanged);
 }
 
 Gestures::~Gestures()

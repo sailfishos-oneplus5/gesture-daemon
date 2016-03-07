@@ -36,7 +36,6 @@ private:
 
     QString _mpris2Service;
     QDBusServiceWatcher *_serviceWatcher;
-
 };
 
 #endif // GESTURE_ACTIONS_H
