@@ -50,14 +50,6 @@ fi
 systemctl-user daemon-reload
 systemctl-user start gestured
 systemctl-user enable gestured
-mkdir -p /home/nemo/.config/systemd/user/post-user-session.target.wants
-ln -s '/etc/systemd/user/gestured.service' '/home/nemo/.config/systemd/user/post-user-session.target.wants/gestured.service'
-chown -hR 100000:100000 /home/nemo
-chmod 755 /home/nemo/.config/systemd
-chmod 755 /home/nemo/.config/systemd/user
-chmod 755 /home/nemo/.config/systemd/user/post-user-session.target.wants
-chmod 777 /home/nemo/.config/systemd/user/post-user-session.target.wants/gestured.service
-
 
 %pre
 # In case of update, stop first
