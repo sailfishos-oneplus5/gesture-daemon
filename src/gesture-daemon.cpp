@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "gesture-actions.h"
+#include "gesture-enabler.h"
 #include <QtCore/QCoreApplication>
 
 #define MCE_SERVICE                 "com.nokia.mce"
@@ -27,6 +28,7 @@ int main(int argc, char **argv)
     qDebug() << "Starting gesture-daemon version" << APPVERSION;
 
     Gestures gestures;
+    GestureEnabler enabledGestures;
 
     static QDBusConnection systembusConnection = QDBusConnection::systemBus();
     systembusConnection.connect(MCE_SERVICE,
