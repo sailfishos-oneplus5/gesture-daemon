@@ -10,7 +10,7 @@
 GestureEnabler::GestureEnabler(QObject *parent) :
     QObject(parent)
 {
-    enabledGestures = new MGConfItem("/apps/onyxgestures");
+    enabledGestures = new MGConfItem("/apps/onyxgestures/enabled-gestures");
 
     /*
      *     UpVee_gesture = (buf[0] & BIT0)?1:0; //"V" -- flashlight
