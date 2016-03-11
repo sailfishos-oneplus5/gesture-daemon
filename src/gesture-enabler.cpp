@@ -35,7 +35,10 @@ GestureEnabler::GestureEnabler(QObject *parent) :
 
 void GestureEnabler::handleEnabledChanged()
 {
-    QStringList eg = enabledGestures->value().toStringList();
+    QStringList def;
+    def << "double_tap";
+
+    QStringList eg = enabledGestures->value(def).toStringList();
     unsigned char mask = 0;
     QMap<QString, char>::iterator i;
 
