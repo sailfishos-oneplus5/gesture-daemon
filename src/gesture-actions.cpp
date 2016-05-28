@@ -23,14 +23,11 @@ Gestures::Gestures(QObject *parent) :
     connect(_serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this, &Gestures::ownerChanged);
 
     cameraDevice = new MGConfItem("/apps/jolla-camera/cameraDevice");
-    cameraCaptureMode = new MGConfItem("/apps/jolla-camera/captureMode");
 
     cameraNeedRestoreSettings = false;
     cameraDeviceValue = cameraDevice->value().toString();
-    cameraCaptureModeValue = cameraCaptureMode->value().toString();
 
     QObject::connect(cameraDevice, SIGNAL(valueChanged()), this, SLOT(cameraValueChanged()));
-    QObject::connect(cameraCaptureMode, SIGNAL(valueChanged()), this, SLOT(cameraValueChanged()));
 }
 
 Gestures::~Gestures()
@@ -118,9 +115,8 @@ void Gestures::toggleFlashlight()
 void Gestures::showCameraViewfinder()
 {
     cameraDeviceValue = cameraDevice->value().toString();
-    cameraCaptureModeValue = cameraCaptureMode->value().toString();
 
-    if (cameraDeviceValue == "primary" || cameraCaptureModeValue == "video")
+    if (cameraDeviceValue != "secondary")
         cameraNeedRestoreSettings = true;
 
     QDBusConnection bus = QDBusConnection::sessionBus();
@@ -136,7 +132,6 @@ void Gestures::cameraValueChanged()
         QThread::msleep(100);
         cameraNeedRestoreSettings = false;
         cameraDevice->set(cameraDeviceValue);
-        cameraCaptureMode->set(cameraCaptureModeValue);
     }
 }
 

@@ -42,10 +42,8 @@ private:
     QDBusServiceWatcher *_serviceWatcher;
 
     MGConfItem *cameraDevice;
-    MGConfItem *cameraCaptureMode;
 
     QString cameraDeviceValue;
-    QString cameraCaptureModeValue;
 };
 
 #endif // GESTURE_ACTIONS_H
