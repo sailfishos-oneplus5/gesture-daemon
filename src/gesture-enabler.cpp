@@ -5,6 +5,7 @@
  *
  */
 
+#include <QDataStream>
 #include "gesture-enabler.h"
 
 GestureEnabler::GestureEnabler(QObject *parent) :
