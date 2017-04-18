@@ -9,7 +9,6 @@
 #include "gesture-actions.h"
 #include <QFile>
 #include <QTextStream>
-#include <mlite5/MGConfItem>
 
 Gestures::Gestures(QObject *parent) :
     QObject(parent)
@@ -21,13 +20,6 @@ Gestures::Gestures(QObject *parent) :
     _serviceWatcher = new QDBusServiceWatcher(this);
     _serviceWatcher->setConnection(bus);
     connect(_serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this, &Gestures::ownerChanged);
-
-    cameraDevice = new MGConfItem("/apps/jolla-camera/cameraDevice");
-
-    cameraNeedRestoreSettings = false;
-    cameraDeviceValue = cameraDevice->value().toString();
-
-    QObject::connect(cameraDevice, SIGNAL(valueChanged()), this, SLOT(cameraValueChanged()));
 }
 
 Gestures::~Gestures()
@@ -114,25 +106,14 @@ void Gestures::toggleFlashlight()
 
 void Gestures::showCameraViewfinder()
 {
-    cameraDeviceValue = cameraDevice->value().toString();
-
-    if (cameraDeviceValue != "secondary")
-        cameraNeedRestoreSettings = true;
-
     QDBusConnection bus = QDBusConnection::sessionBus();
-    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.camera", "/", "com.jolla.camera", "showFrontViewfinder");
+    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.camera", "/", "com.jolla.camera.ui", "showViewfinder");
+
+    QVariantList args;
+    args << QString("hello");
+    call.setArguments(args);
 
     bus.call(call, QDBus::NoBlock, 1);
-}
-
-void Gestures::cameraValueChanged()
-{
-    if (cameraNeedRestoreSettings)
-    {
-        QThread::msleep(100);
-        cameraNeedRestoreSettings = false;
-        cameraDevice->set(cameraDeviceValue);
-    }
 }
 
 void Gestures::showVoicecallUi()

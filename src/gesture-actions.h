@@ -12,7 +12,6 @@
 #include <QtDBus/QtDBus>
 #include <QTimer>
 #include <QThread>
-#include <mlite5/MGConfItem>
 
 class Gestures : public QObject
 {
@@ -27,7 +26,6 @@ public slots:
 
 private slots:
     void ownerChanged(const QString &name, const QString &oldOwner, const QString &newOwner);
-    void cameraValueChanged();
 
 private:
     void toggleFlashlight();
@@ -36,14 +34,8 @@ private:
     void showVoicecallUi();
     bool getMpris2Service();
 
-    bool cameraNeedRestoreSettings;
-
     QString _mpris2Service;
     QDBusServiceWatcher *_serviceWatcher;
-
-    MGConfItem *cameraDevice;
-
-    QString cameraDeviceValue;
 };
 
 #endif // GESTURE_ACTIONS_H
