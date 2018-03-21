@@ -42,20 +42,20 @@ rm -rf %{buildroot}
 %preun
 # in case of complete removal, stop and disable
 if [ "$1" = "0" ]; then
-  systemctl-user stop gestured
-  systemctl-user disable gestured
+  systemctl-user stop gestured || true
+  systemctl-user disable gestured || true
 fi
 
 %post
-systemctl-user daemon-reload
-systemctl-user start gestured
-systemctl-user enable gestured
+systemctl-user daemon-reload || true
+systemctl-user start gestured || true
+systemctl-user enable gestured || true
 
 %pre
 # In case of update, stop first
 if [ "$1" = "2" ]; then
-  systemctl-user stop gestured
-  systemctl-user disable gestured
+  systemctl-user stop gestured || true
+  systemctl-user disable gestured || true
 fi
 
 %files
