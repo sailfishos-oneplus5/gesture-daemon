@@ -73,35 +73,15 @@ void Gestures::handleGestureEvent(const QDBusMessage & msg)
 
 void Gestures::toggleFlashlight()
 {
-    int brightness = 0;
+    QDBusConnection bus = QDBusConnection::sessionBus();
+    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.settings.system.flashlight",
+                                                       "/com/jolla/settings/system/flashlight",
+                                                       "com.jolla.settings.system.flashlight",
+                                                       "toggleFlashlight");
 
-    QFile brf("/sys/class/leds/led:flash_torch/brightness");
-    if (!brf.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qWarning() << "Flashlight toggle failed.";
-        return;
-    }
-
-    QTextStream in( &brf );
-    brightness = in.readLine().toInt();
-
-    brf.close();
-
-    if (brightness == 0)
-        brightness = 255;
-    else
-        brightness = 0;
-
-    if (!brf.open(QIODevice::WriteOnly))
-    {
-        qWarning() << "Flashlight toggle failed.";
-        return;
-    }
-
-    QTextStream out (&brf);
-    out << QString("%1").arg(brightness);
-
-    brf.close();
+    QDBusError error = bus.call(call);
+    if (error.isValid())
+        qWarning() << "Flashlight toggle failed:" << error.message();
 }
 
 //
