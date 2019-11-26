@@ -11,7 +11,7 @@ DEFINES += "APPVERSION=\\\"$${SPECVERSION}\\\""
 target.path = /usr/bin/
 
 systemduser.files = config/$${TARGET}.service
-systemduser.path = /etc/systemd/user/
+systemduser.path = /lib/systemd/user/
 
 INSTALLS += target systemduser
 

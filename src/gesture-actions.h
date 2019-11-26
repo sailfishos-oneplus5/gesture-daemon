@@ -12,6 +12,7 @@
 #include <QObject>
 #include <QtDBus/QtDBus>
 
+
 class Gestures : public QObject
 {
     Q_OBJECT

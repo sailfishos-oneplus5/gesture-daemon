@@ -15,6 +15,7 @@
 #include <QTextStream>
 #include <mlite5/MGConfItem>
 
+
 class GestureEnabler : public QObject
 {
     Q_OBJECT

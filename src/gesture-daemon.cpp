@@ -19,6 +19,7 @@
 #define MCE_SIGNAL_IF               "com.nokia.mce.signal"
 #define POWER_BUTTON_TRIGGER_SIG    "power_button_trigger"
 
+
 //
 //  Daemon init
 //
