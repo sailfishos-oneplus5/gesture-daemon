@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QFile>
-#include <QDataStream>
+#include <QTextStream>
 #include <mlite5/MGConfItem>
 
 class GestureEnabler : public QObject
@@ -25,9 +25,10 @@ public slots:
     void handleEnabledGestureChanged();
 
 private:
+    void writeGestureState(QString gesture_enable, QString enabled_value);
+
     MGConfItem *dconfGestures;
     QStringList defGestures = { "double_tap", "voicecall", "camera", "music", "flashlight" };
-    QMap<QString, char> gestureMasks;
 };
 
 #endif // GESTUREENABLER_H

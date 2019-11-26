@@ -16,22 +16,6 @@ GestureEnabler::GestureEnabler(QObject *parent) : QObject(parent)
 {
     dconfGestures = new MGConfItem("/apps/onyxgestures/enabled-gestures"); // e.g. ['double_tap', 'flashlight', 'music', 'camera', 'voicecall']
 
-    /*
-     *     UpVee_gesture = (buf[0] & BIT0)?1:0; //"V" -- flashlight
-     *     DouSwip_gesture = (buf[0] & BIT1)?1:0;//"||" -- music
-     *     DownVee_gesture = (buf[0] & BIT2)?1:0;//"^" -- voicecall
-     *     LeftVee_gesture = (buf[0] & BIT3)?1:0; //">" -- music
-     *     RightVee_gesture = (buf[0] & BIT4)?1:0;//"<" -- music
-     *     Circle_gesture = (buf[0] & BIT6)?1:0; //"O" -- camera
-     *     DouTap_gesture = (buf[0] & BIT7)?1:0; //double tap
-     */
-
-    gestureMasks.insert("camera", 0x40);
-    gestureMasks.insert("music",0x1A);
-    gestureMasks.insert("flashlight", 0x01);
-    gestureMasks.insert("double_tap", 0x80);
-    gestureMasks.insert("voicecall", 0x04);
-
     // Restore previously enabled gestures on daemon startup
     handleEnabledGestureChanged();
 
@@ -45,26 +29,57 @@ GestureEnabler::GestureEnabler(QObject *parent) : QObject(parent)
 
 void GestureEnabler::handleEnabledGestureChanged()
 {
-    QStringList eg = dconfGestures->value(defGestures).toStringList();
-    unsigned char mask = 0;
-    QMap<QString, char>::iterator i;
+    QStringList enabledGestures = dconfGestures->value(defGestures).toStringList();
 
-    qDebug() << "Currently enabled gestures:" << eg;
+    qDebug() << "Currently enabled gestures:" << enabledGestures;
 
-    for (i = gestureMasks.begin(); i != gestureMasks.end(); ++i)
+    QMap<QStringList, QString> newGestureStates;
+
+    // Build a list of which gestures to enable/disable in sysfs
+    for (const auto& gesture : defGestures)
     {
-        if (eg.contains(i.key()))
-            mask |= i.value();
+        QStringList items;
+        if (gesture.compare("voicecall") == 0)
+            items << "up_arrow_enable";
+        else if (gesture.compare("flashlight") == 0)
+            items << "down_arrow_enable";
+        else if (gesture.compare("camera") == 0)
+            items << "letter_o_enable";
+        else if (gesture.compare("music") == 0)
+            items << "double_swipe_enable" << "left_arrow_enable" << "right_arrow_enable";
+        else
+            items << gesture + "_enable";
+
+        bool state = enabledGestures.contains(gesture);
+
+        newGestureStates.insert(items,  (state ? "1" : "0"));
     }
 
-    QFile outputFile( "/proc/touchpanel/gesture_enable" );
-
-    if (outputFile.open(QIODevice::WriteOnly))
+    // Enable/disable all gestures as approperiate
+    for(auto gestures : newGestureStates.keys())
     {
-        QDataStream out(&outputFile);
-        out << mask;
-        outputFile.close();
+        // Value to write
+        QString enabled_value = newGestureStates.value(gestures);
+
+        // Go thru all grouped gestures
+        for (const auto& gesture : gestures)
+            writeGestureState(gesture, enabled_value);
+    }
+}
+
+//
+//  Enable / disable a specific gesture
+//
+
+void GestureEnabler::writeGestureState(QString gesture_enable, QString enabled_value)
+{
+    QString filePath = "/proc/touchpanel/" + gesture_enable; // e.g. "/proc/touchpanel/double_tap_enable"
+    QFile outFile(filePath);
+    if (outFile.open(QIODevice::WriteOnly))
+    {
+        QTextStream stream(&outFile);
+        stream << enabled_value; // "1" / "0"
     }
     else
-        qWarning() << "Failed to write";
+        qWarning() << ("Failed to write '" + enabled_value + "' to " + filePath + "...");
 }
