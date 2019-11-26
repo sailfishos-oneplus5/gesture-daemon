@@ -1,6 +1,7 @@
 [Unit]
-Description=Gesture daemon
-After=user-session.target
+Description=Sleep mode gesture daemon
+Requires=lipstick.service
+After=user-session.target lipstick.service
 
 [Service]
 ExecStart=/usr/bin/gestured
