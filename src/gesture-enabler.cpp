@@ -1,17 +1,20 @@
 /*
  * (C) 2016 Kimmo Lindholm <kimmo.lindholm@eke.fi>
+ * (C) 2019 Jami Kettunen <jami.kettunen@protonmail.com>
  *
  * Gesture daemon
  *
  */
 
-#include <QDataStream>
 #include "gesture-enabler.h"
 
-GestureEnabler::GestureEnabler(QObject *parent) :
-    QObject(parent)
+//
+//  Init
+//
+
+GestureEnabler::GestureEnabler(QObject *parent) : QObject(parent)
 {
-    enabledGestures = new MGConfItem("/apps/onyxgestures/enabled-gestures");
+    dconfGestures = new MGConfItem("/apps/onyxgestures/enabled-gestures"); // e.g. ['double_tap', 'flashlight', 'music', 'camera', 'voicecall']
 
     /*
      *     UpVee_gesture = (buf[0] & BIT0)?1:0; //"V" -- flashlight
@@ -29,21 +32,24 @@ GestureEnabler::GestureEnabler(QObject *parent) :
     gestureMasks.insert("double_tap", 0x80);
     gestureMasks.insert("voicecall", 0x04);
 
-    handleEnabledChanged();
+    // Restore previously enabled gestures on daemon startup
+    handleEnabledGestureChanged();
 
-    connect(enabledGestures, SIGNAL(valueChanged()), this, SLOT(handleEnabledChanged()));
+    // Start listening for future gesture & setting enablement changes
+    connect(dconfGestures, SIGNAL(valueChanged()), this, SLOT(handleEnabledGestureChanged()));
 }
 
-void GestureEnabler::handleEnabledChanged()
-{
-    QStringList def;
-    def << "double_tap";
+//
+//  Gesture enabled toggle detection
+//
 
-    QStringList eg = enabledGestures->value(def).toStringList();
+void GestureEnabler::handleEnabledGestureChanged()
+{
+    QStringList eg = dconfGestures->value(defGestures).toStringList();
     unsigned char mask = 0;
     QMap<QString, char>::iterator i;
 
-    qDebug() << eg;
+    qDebug() << "Currently enabled gestures:" << eg;
 
     for (i = gestureMasks.begin(); i != gestureMasks.end(); ++i)
     {
@@ -60,8 +66,5 @@ void GestureEnabler::handleEnabledChanged()
         outputFile.close();
     }
     else
-    {
         qWarning() << "Failed to write";
-    }
 }
-

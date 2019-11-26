@@ -1,9 +1,18 @@
+/*
+ * (C) 2016 Kimmo Lindholm <kimmo.lindholm@eke.fi>
+ * (C) 2019 Jami Kettunen <jami.kettunen@protonmail.com>
+ *
+ * Gesture daemon
+ *
+ */
+
 #ifndef GESTUREENABLER_H
 #define GESTUREENABLER_H
 
-#include <QObject>
 #include <QDebug>
+#include <QObject>
 #include <QFile>
+#include <QDataStream>
 #include <mlite5/MGConfItem>
 
 class GestureEnabler : public QObject
@@ -13,12 +22,12 @@ public:
     explicit GestureEnabler(QObject *parent = 0);
 
 public slots:
-    void handleEnabledChanged();
+    void handleEnabledGestureChanged();
 
 private:
-    MGConfItem *enabledGestures;
+    MGConfItem *dconfGestures;
+    QStringList defGestures = { "double_tap", "voicecall", "camera", "music", "flashlight" };
     QMap<QString, char> gestureMasks;
-
 };
 
 #endif // GESTUREENABLER_H

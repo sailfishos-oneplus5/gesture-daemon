@@ -1,5 +1,6 @@
 /*
  * (C) 2016 Kimmo Lindholm <kimmo.lindholm@eke.fi>
+ * (C) 2019 Jami Kettunen <jami.kettunen@protonmail.com>
  *
  * Gesture daemon
  *
@@ -7,12 +8,14 @@
 
 #include <stdio.h>
 #include "gesture-actions.h"
-#include <QFile>
-#include <QTextStream>
 
-Gestures::Gestures(QObject *parent) :
-    QObject(parent)
+//
+//  MPRIS2 init
+//
+
+Gestures::Gestures(QObject *parent) : QObject(parent)
 {
+    // Setup MPRIS2 service watcher
     _mpris2Service = QString();
 
     QDBusConnection bus = QDBusConnection::sessionBus();
@@ -22,53 +25,51 @@ Gestures::Gestures(QObject *parent) :
     connect(_serviceWatcher, &QDBusServiceWatcher::serviceOwnerChanged, this, &Gestures::ownerChanged);
 }
 
-Gestures::~Gestures()
-{
-}
+Gestures::~Gestures() {  }
+
+//
+//  Handle gestures via MCE signal
+//
 
 void Gestures::handleGestureEvent(const QDBusMessage & msg)
 {
     QList<QVariant> args = msg.arguments();
     QString gestureEvent = args.at(0).toString();
 
+    // Simply ignore other non-gesture actions
+    if (!gestureEvent.startsWith("event")) return;
+
     qDebug() << "MCE signal power_button_trigger says" << gestureEvent;
 
     /* event type EV_MSC
      * event code MSC_GESTURE
      *
-     * event value 5 --> event5 --> flashlight
-     * event value 6 --> event6 --> camera
-     * event value 7 --> event7 --> voicecall
-     * event value 8 --> event8 --> play/pause
-     * event value 9 --> event9 --> next
-     * event value 10 -> event10 -> previous
+     * event value 4  -> event4  -> wakeup (not handled here)
+     * event value 5  -> event5  -> play/pause
+     * event value 6  -> event6  -> voicecall
+     * event value 7  -> event7  -> flashlight
+     * event value 8  -> event8  -> previous
+     * event value 9  -> event9  -> next
+     * event value 10 -> event10 -> camera
      */
 
-    if (gestureEvent.compare("event5") == 0)
-    {
-        toggleFlashlight();
-    }
-    else if (gestureEvent.compare("event6") == 0)
-    {
-        showCameraViewfinder();
-    }
-    else if (gestureEvent.compare("event7") == 0)
-    {
-        showVoicecallUi();
-    }
-    else if (gestureEvent.compare("event8") == 0)
-    {
+    if (gestureEvent.compare("event5") == 0)       // Double swipe '↓↓'
         sendMpris2("PlayPause");
-    }
-    else if (gestureEvent.compare("event9") == 0)
-    {
-        sendMpris2("Next");
-    }
-    else if (gestureEvent.compare("event10") == 0)
-    {
+    else if (gestureEvent.compare("event6") == 0)  // Arrow up 'Ʌ'
+        showVoicecallUi();
+    else if (gestureEvent.compare("event7") == 0)  // Arrow down 'V'
+        toggleFlashlight();
+    else if (gestureEvent.compare("event8") == 0)  // Arrow left '<'
         sendMpris2("Previous");
-    }
+    else if (gestureEvent.compare("event9") == 0)  // Arrow right '>'
+        sendMpris2("Next");
+    else if (gestureEvent.compare("event10") == 0) // Circle 'O'
+        showCameraViewfinder();
 }
+
+//
+//  Flashlight toggle
+//
 
 void Gestures::toggleFlashlight()
 {
@@ -101,37 +102,51 @@ void Gestures::toggleFlashlight()
     out << QString("%1").arg(brightness);
 
     brf.close();
-
 }
+
+//
+//  Launch camera
+//
 
 void Gestures::showCameraViewfinder()
 {
     QDBusConnection bus = QDBusConnection::sessionBus();
-    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.camera", "/", "com.jolla.camera.ui", "showViewfinder");
+    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.camera",
+                                                       "/",
+                                                       "com.jolla.camera.ui",
+                                                       "showViewfinder");
 
     QVariantList args;
-    args << QString("hello");
+    args << QString("");
     call.setArguments(args);
 
     bus.call(call, QDBus::NoBlock, 1);
 }
 
+//
+//  Call history
+//
+
 void Gestures::showVoicecallUi()
 {
     QDBusConnection bus = QDBusConnection::sessionBus();
-    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.voicecall.ui", "/org/maemo/m", "com.nokia.telephony.callhistory", "launch");
+    QDBusMessage call = QDBusMessage::createMethodCall("com.jolla.voicecall.ui",
+                                                       "/org/maemo/m",
+                                                       "com.nokia.telephony.callhistory",
+                                                       "launch");
 
     QVariantList args;
-    args << QString("hello");
+    args << QString("");
     call.setArguments(args);
 
     QDBusError error = bus.call(call);
-
     if (error.isValid())
-    {
-        qWarning() << "voicecall ui launch failed:" << error.message();
-    }
+        qWarning() << "Call history UI launch failed:" << error.message();
 }
+
+//
+//  Music controls (play/pause doesn't work! next/prev go forward/back by 2 tracks instead of just 1!)
+//
 
 void Gestures::sendMpris2(const QString &methodName)
 {
@@ -139,7 +154,7 @@ void Gestures::sendMpris2(const QString &methodName)
     {
         if (!getMpris2Service())
         {
-            qDebug() << "no mpris2 service available";
+            qDebug() << "No MPRIS2 service available";
             return;
         }
     }
@@ -150,18 +165,16 @@ void Gestures::sendMpris2(const QString &methodName)
                                                        "org.mpris.MediaPlayer2.Player",
                                                        methodName);
 
-    QDBusError error = bus.call(call);
+    qDebug() << "Invoking" << methodName << "on" << _mpris2Service;
 
+    QDBusError error = bus.call(call);
     if (error.isValid())
-    {
-        qWarning() << "mpris2 " << _mpris2Service << " failed:" << error.message();
-    }
+        qWarning() << "MPRIS2 " << _mpris2Service << " failed:" << error.message();
 }
 
 bool Gestures::getMpris2Service()
 {
     bool ret = false;
-
     QDBusConnection bus = QDBusConnection::sessionBus();
     QDBusConnectionInterface *bus_iface = bus.interface();
 
@@ -171,7 +184,7 @@ bool Gestures::getMpris2Service()
         if (service.startsWith("org.mpris.MediaPlayer2."))
         {
             _mpris2Service = service;
-            qDebug() << "found mpris2 service:" << _mpris2Service;
+            qDebug() << "Found MPRIS2 service:" << _mpris2Service;
             ret = true;
             break;
         }
@@ -185,7 +198,7 @@ void Gestures::ownerChanged(const QString &name, const QString &oldOwner, const 
 
     if (name == _mpris2Service && newOwner.isEmpty())
     {
-        qDebug() << "mpris2 service" << _mpris2Service << "removed from bus";
+        qDebug() << "MPRIS2 service" << _mpris2Service << "removed from bus";
         _mpris2Service = QString();
     }
 }

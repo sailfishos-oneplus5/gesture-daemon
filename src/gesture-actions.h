@@ -1,5 +1,6 @@
 /*
  * (C) 2016 Kimmo Lindholm <kimmo.lindholm@eke.fi>
+ * (C) 2019 Jami Kettunen <jami.kettunen@protonmail.com>
  *
  * Gesture daemon
  *
@@ -10,8 +11,6 @@
 
 #include <QObject>
 #include <QtDBus/QtDBus>
-#include <QTimer>
-#include <QThread>
 
 class Gestures : public QObject
 {
