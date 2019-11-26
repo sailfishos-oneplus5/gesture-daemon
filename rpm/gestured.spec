@@ -13,7 +13,7 @@ Name:       gestured
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 
 Summary:    Sleep mode gesture daemon
-Version:    0.0.devel
+Version:    0.1.0
 Release:    1
 Group:      System/Daemons
 License:    LICENSE
