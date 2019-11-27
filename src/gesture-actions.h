@@ -10,7 +10,7 @@
 #define GESTURE_ACTIONS_H
 
 #include <QObject>
-#include <QtDBus/QtDBus>
+#include <QtDBus>
 
 
 class Gestures : public QObject

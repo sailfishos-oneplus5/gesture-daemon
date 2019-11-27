@@ -6,6 +6,8 @@
  *
  */
 
+#include <QFile>
+#include <QTextStream>
 #include "gesture-enabler.h"
 
 

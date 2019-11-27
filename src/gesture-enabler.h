@@ -11,14 +11,13 @@
 
 #include <QDebug>
 #include <QObject>
-#include <QFile>
-#include <QTextStream>
 #include <mlite5/MGConfItem>
 
 
 class GestureEnabler : public QObject
 {
     Q_OBJECT
+
 public:
     explicit GestureEnabler(QObject *parent = 0);
 

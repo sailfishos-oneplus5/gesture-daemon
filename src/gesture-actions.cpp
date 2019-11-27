@@ -126,7 +126,7 @@ void Gestures::showVoicecallUi()
 }
 
 //
-//  Music controls (play/pause doesn't work! next/prev go forward/back by 2 tracks instead of just 1!)
+//  Music controls
 //
 
 void Gestures::sendMpris2(const QString &methodName)

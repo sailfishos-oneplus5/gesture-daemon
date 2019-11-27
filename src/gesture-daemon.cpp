@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <QtCore/QCoreApplication>
+#include <QCoreApplication>
 #include "gesture-actions.h"
 #include "gesture-enabler.h"
 
