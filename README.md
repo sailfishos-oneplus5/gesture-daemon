@@ -8,6 +8,8 @@ Enabled gestures are controlled via dconf @ `/apps/onyxgestures/enabled-gestures
 enabled-gestures=['double_tap', 'flashlight', 'music', 'camera', 'voicecall']
 ```
 
+There is also a [Sailfish OS settings plugin](https://github.com/sailfishos-oneplus5/onyx-gesture-settings-plugin) available for simple control of these values through the settings app.
+
 ## Adaptation
 If your device supports this feature, getting sleep mode gestures working in SFOS may need the following changes:
 
