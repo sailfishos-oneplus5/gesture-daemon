@@ -14,7 +14,7 @@ Name:       gestured
 
 Summary:    Sleep mode gesture daemon
 Version:    0.1.0
-Release:    1
+Release:    2
 Group:      System/Daemons
 License:    LICENSE
 URL:        https://github.com/sailfishos-oneplus5/gesture-daemon
