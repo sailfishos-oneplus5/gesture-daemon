@@ -8,14 +8,9 @@ QT -= gui
 
 DEFINES += "APPVERSION=\\\"$${SPECVERSION}\\\""
 
-target.path = /usr/bin/
-
-systemduser.files = config/$${TARGET}.service
-systemduser.path = /lib/systemd/user/
-
-INSTALLS += target systemduser
-
-message($${DEFINES})
+HEADERS += \
+    src/gesture-actions.h \
+    src/gesture-enabler.h
 
 SOURCES += \
     src/gesture-daemon.cpp \
@@ -26,6 +21,9 @@ OTHER_FILES += \
     rpm/$${TARGET}.spec \
     config/$${TARGET}.service
 
-HEADERS += \
-    src/gesture-actions.h \
-    src/gesture-enabler.h
+target.path = /usr/bin/
+
+systemduser.files = config/$${TARGET}.service
+systemduser.path = /usr/lib/systemd/user/
+
+INSTALLS += target systemduser
